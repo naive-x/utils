@@ -10,6 +10,7 @@ require (
 	github.com/google/go-github/v30 v30.1.0
 	github.com/hdm/jarm-go v0.0.7
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/k0kubun/pp v2.4.0+incompatible
 	github.com/kljensen/snowball v0.8.0
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.25
@@ -42,6 +43,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -100,3 +102,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
+
+replace github.com/projectdiscovery/utils => ./

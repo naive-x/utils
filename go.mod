@@ -19,6 +19,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/projectdiscovery/blackrock v0.0.1
 	github.com/projectdiscovery/fdmax v0.0.4
+	github.com/projectdiscovery/utils v0.0.63
 	github.com/remeh/sizedwaitgroup v1.0.0
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
 	github.com/shirou/gopsutil/v3 v3.23.7
@@ -40,10 +41,10 @@ require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -55,11 +56,11 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.1 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
-	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/samber/lo v1.39.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tidwall/btree v1.4.3 // indirect

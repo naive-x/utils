@@ -14,9 +14,9 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/charmbracelet/glamour"
-	"github.com/denisbrodbeck/machineid"
 	"github.com/minio/selfupdate"
 	"github.com/projectdiscovery/gologger"
+	"github.com/projectdiscovery/machineid"
 	errorutil "github.com/projectdiscovery/utils/errors"
 )
 
@@ -28,6 +28,7 @@ const (
 var (
 	// By default when tool is updated release notes of latest version are printed
 	HideReleaseNotes      = false
+	NoColorReleaseNotes   = false
 	HideProgressBar       = false
 	VersionCheckTimeout   = time.Duration(5) * time.Second
 	DownloadUpdateTimeout = time.Duration(30) * time.Second
@@ -90,8 +91,12 @@ func GetUpdateToolFromRepoCallback(toolName, version, repoName string) func() {
 
 		if !HideReleaseNotes {
 			output := gh.Latest.GetBody()
-			// adjust colors for both dark / light terminal themes
-			r, err := glamour.NewTermRenderer(glamour.WithAutoStyle())
+
+			style := glamour.WithAutoStyle()
+			if NoColorReleaseNotes {
+				style = glamour.WithStyles(glamour.ASCIIStyleConfig)
+			}
+			r, err := glamour.NewTermRenderer(style)
 			if err != nil {
 				gologger.Error().Msgf("markdown rendering not supported: %v", err)
 			}
@@ -149,18 +154,29 @@ func GetToolVersionCallback(toolName, version string) func() (string, error) {
 // GetpdtmParams returns encoded query parameters sent to update check endpoint
 func GetpdtmParams(version string) string {
 	params := &url.Values{}
-	params.Add("os", runtime.GOOS)
+	os := runtime.GOOS
+	if runtime.GOOS == "linux" {
+		// be more specific
+		os = GetOSVendor()
+	}
+	params.Add("os", os)
 	params.Add("arch", runtime.GOARCH)
 	params.Add("go_version", runtime.Version())
 	params.Add("v", version)
-	params.Add("machine_id", buildMachineId())
+	params.Add("machine_id", GetMachineID()) // for rate limiting
+	params.Add("utm_source", getUtmSource())
 	return params.Encode()
 }
 
-func buildMachineId() string {
+// GetMachineID return a unique identifier that is unique to the machine
+// it is a sha256 hashed value with pdtm as salt
+func GetMachineID() string {
 	machineId, err := machineid.ProtectedID("pdtm")
 	if err != nil {
-		return "unknown"
+		return getCustomMID()
+	}
+	if machineId == "" {
+		return getCustomMID()
 	}
 	return machineId
 }

@@ -53,6 +53,13 @@ func TestParse(t *testing.T) {
 	require.Equal(t, "127.0.0.1", U.Hostname(), "different host")
 	require.Equal(t, "a", U.Fragment, "different fragment")
 	require.Equal(t, "http://127.0.0.1/#a", U.String(), "different full url")
+
+	// websocket
+	U, err = Parse("wss://127.0.0.1")
+	require.Nil(t, err, "could not parse url")
+	require.Equal(t, "wss", U.Scheme, "different scheme")
+	require.Equal(t, "127.0.0.1", U.Hostname(), "different host")
+	require.Equal(t, "wss://127.0.0.1", U.String(), "different full url")
 }
 
 func TestClone(t *testing.T) {
@@ -94,11 +101,13 @@ func TestInvalidURLs(t *testing.T) {
 		"https://127.0.0.1:52272/%invalid",
 		"http.s3.amazonaws.com",
 		"https.s3.amazonaws.com",
+		"scanme.sh/xyz/invalid",
+		"scanme.sh/xyz/%u2s/%invalid",
 	}
 	for _, v := range testcases {
-		urlx, err := ParseURL(v, true)
+		urlx, err := ParseAbsoluteURL(v, true)
 		require.Nilf(t, err, "got error for url %v", v)
-		require.Equal(t, urlx.String(), v)
+		require.Equal(t, v, urlx.String())
 	}
 }
 
@@ -190,11 +199,30 @@ func TestUnicodeEscapeWithUnsafe(t *testing.T) {
 	}{
 		{"https://scanme.sh/%u002e%u002e/%u002e%u002e/1.txt.it", "https://scanme.sh/%u002e%u002e/%u002e%u002e/1.txt.it"},
 	}
-	DisableAutoCorrect = true
 
 	for _, v := range testcases {
-		urlx, err := ParseURL(v.input, true)
+		urlx, err := ParseAbsoluteURL(v.input, true)
 		require.Nilf(t, err, "got error for url %v", v.input)
 		require.Equal(t, v.expected, urlx.String())
+	}
+}
+
+func TestInvalidScheme(t *testing.T) {
+	testcases := []struct {
+		input       string
+		expectedErr bool
+	}{
+		{"//:foo", true},
+		{"://foo", true},
+	}
+	for _, v := range testcases {
+		urlx, err := ParseAbsoluteURL(v.input, true)
+		if v.expectedErr {
+			require.NotNil(t, err)
+			require.Nil(t, urlx)
+		} else {
+			require.Nil(t, err)
+			require.NotNil(t, urlx)
+		}
 	}
 }

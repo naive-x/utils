@@ -2,10 +2,17 @@ package updateutils
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/google/uuid"
 	"github.com/logrusorgru/aurora"
+
+	fileutil "github.com/projectdiscovery/utils/file"
+	folderutil "github.com/projectdiscovery/utils/folder"
+	"github.com/projectdiscovery/utils/process"
 )
 
 type AssetFormat uint
@@ -98,4 +105,78 @@ func IsDevReleaseOutdated(current string, latest string) bool {
 		return true
 	}
 	return false
+}
+
+// getUtmSource returns utm_source from environment variable or "unknown" value
+// this is non-intrusive way to identify the source of the tool to improve tool experience across environments
+func getUtmSource() string {
+	value := "unknown"
+	switch {
+	case os.Getenv("GH_ACTION") != "":
+		value = "ghci"
+	case os.Getenv("TRAVIS") != "":
+		value = "travis"
+	case os.Getenv("CIRCLECI") != "":
+		value = "circleci"
+	case os.Getenv("CI") != "":
+		value = "gitlabci" // this also includes bitbucket
+	case os.Getenv("GITHUB_ACTIONS") != "":
+		value = "ghci"
+	case os.Getenv("AWS_EXECUTION_ENV") != "":
+		value = os.Getenv("AWS_EXECUTION_ENV")
+	case os.Getenv("JENKINS_URL") != "":
+		value = "jenkins"
+	case os.Getenv("FUNCTION_TARGET") != "":
+		value = "gcf"
+	case os.Getenv("GOOGLE_CLOUD_PROJECT") != "":
+		value = "gcp"
+	case os.Getenv("HEROKU_APP_NAME") != "":
+		value = "heroku"
+	case os.Getenv("DYNO") != "":
+		value = "heroku"
+	case os.Getenv("ECS_CONTAINER_METADATA_URI") != "":
+		value = "ecs"
+	case os.Getenv("EC2_INSTANCE_ID") != "":
+		value = "ec2"
+	case os.Getenv("KUBERNETES_SERVICE_HOST") != "":
+		value = "k8s"
+	case os.Getenv("KUBERNETES_PORT") != "":
+		value = "k8s"
+	case os.Getenv("AZURE_FUNCTIONS_ENVIRONMENT") != "":
+		value = "azure"
+	case os.Getenv("__OW_API_HOST") != "":
+		value = "ibmcf"
+	case os.Getenv("OCI_RESOURCE_PRINCIPAL_VERSION") != "":
+		value = "oracle"
+	case os.Getenv("GAE_RUNTIME") != "":
+		value = os.Getenv("GAE_RUNTIME")
+	default:
+		if ok, val := process.RunningInContainer(); ok {
+			return val
+		}
+	}
+	if value == "" {
+		value = "unknown"
+	}
+	return value
+}
+
+// getCustomMID returns a unique identifier that is unique to the machine
+// this might be used for rate limiting
+func getCustomMID() string {
+	dir := folderutil.AppConfigDirOrDefault(os.TempDir(), "subfinder")
+	if !fileutil.FolderExists(dir) {
+		_ = fileutil.CreateFolders(dir)
+	}
+	midFile := filepath.Join(dir, "uuid.txt")
+	if !fileutil.FileExists(midFile) {
+		uuid := uuid.New()
+		_ = os.WriteFile(midFile, []byte(uuid.String()), 0600)
+	}
+	bin, _ := os.ReadFile(midFile)
+	mid := string(bin)
+	if mid == "" {
+		mid = "error"
+	}
+	return mid
 }
